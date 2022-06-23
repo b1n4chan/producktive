@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
-import { auth, db, logout } from "./firebase";
-import { query, collection, getDocs, where } from "firebase/firestore";
+import "./OuterTask.css";
+import { auth, db, logout } from "../firebase";
 import { styled, useTheme } from "@mui/material/styles";
 import {
   Typography,
-  Button,
-  Paper,
   Toolbar,
   IconButton,
   Menu,
@@ -32,7 +29,6 @@ import NotesIcon from "@mui/icons-material/Notes";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MuiAppBar from "@mui/material/AppBar";
-import Deadline from "./Deadline";
 
 const drawerWidth = 240;
 
@@ -81,37 +77,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-function Dashboard() {
-  const [user, loading, error] = useAuthState(auth);
-  const [name, setName] = useState("");
+function OuterTask(props) {
+  const { children } = props;
+  const [user] = useAuthState(auth);
+  const [name] = useState("");
   const navigate = useNavigate();
-
-  const fetchUserName = async () => {
-    try {
-      const q = query(collection(db, "users"), where("uid", "==", user?.uid));
-      const doc = await getDocs(q);
-      const data = doc.docs[0].data();
-
-      setName(data.name);
-    } catch (err) {
-      console.error(err);
-      alert("An error occured while fetching user data");
-    }
-  };
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user) return navigate("/");
-
-    fetchUserName();
-  }, [user, loading]);
-
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -144,7 +119,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard">
+    <div className="outertask">
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar
@@ -240,8 +215,8 @@ function Dashboard() {
                 <ListItemText primary="Task Distributor" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={toNotes}>
+            <ListItem disablePadding onClick={toNotes}>
+              <ListItemButton>
                 <ListItemIcon>
                   <NotesIcon />
                 </ListItemIcon>
@@ -252,39 +227,11 @@ function Dashboard() {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <Paper
-            elevation={3}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              textAlign: "center",
-              backgroundColor: "white",
-              padding: "35px",
-            }}
-          >
-            <Typography variant="h6" gutterBottom component="div">
-              Logged in as
-            </Typography>
-            <Typography>{name}</Typography>
-            <Typography>{user?.email}</Typography>
-            <Button
-              variant="contained"
-              style={{
-                color: "white",
-                backgroundColor: "black",
-                padding: "10px",
-                marginTop: "20px",
-                marginBottom: "10px",
-              }}
-              onClick={logout}
-            >
-              Logout
-            </Button>
-          </Paper>
+          {children}
         </Main>
       </Box>
     </div>
   );
 }
 
-export default Dashboard;
+export default OuterTask;

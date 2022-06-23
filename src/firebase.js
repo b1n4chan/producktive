@@ -92,9 +92,12 @@ const logout = () => {
   signOut(auth);
 };
 
+const getUser = () => auth.currentUser;
+
 export {
   auth,
   db,
+  getUser,
   signInWithGoogle,
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
