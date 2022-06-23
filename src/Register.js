@@ -7,8 +7,17 @@ import {
   signInWithGoogle,
 } from "./firebase";
 import "./Register.css";
-import { Typography, Button, TextField, Paper } from "@mui/material";
+import {
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -16,6 +25,9 @@ function Register() {
   const [name, setName] = useState("");
   const [user, loading, error] = useAuthState(auth);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
   const register = () => {
     if (!name) alert("Please enter name");
@@ -41,6 +53,7 @@ function Register() {
       >
         <h1>REGISTER</h1>
         <TextField
+          sx={{ marginBottom: "10px" }}
           id="outlined-basic"
           label="Full Name"
           variant="outlined"
@@ -48,6 +61,7 @@ function Register() {
           onChange={(e) => setName(e.target.value)}
         />
         <TextField
+          sx={{ marginBottom: "10px" }}
           id="outlined-basic"
           label="E-mail Address"
           variant="outlined"
@@ -56,10 +70,24 @@ function Register() {
         />
         <TextField
           id="outlined-basic"
+          type={showPassword ? "text" : "password"}
           label="Password"
           variant="outlined"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <Button
           variant="contained"

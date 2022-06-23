@@ -32,7 +32,6 @@ import NotesIcon from "@mui/icons-material/Notes";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MuiAppBar from "@mui/material/AppBar";
-import Deadline from "./Deadline";
 
 const drawerWidth = 240;
 
@@ -81,37 +80,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-function Dashboard() {
-  const [user, loading, error] = useAuthState(auth);
-  const [name, setName] = useState("");
+function Outer(props) {
+  const { children } = props;
+  const [user] = useAuthState(auth);
+  const [name] = useState("");
   const navigate = useNavigate();
-
-  const fetchUserName = async () => {
-    try {
-      const q = query(collection(db, "users"), where("uid", "==", user?.uid));
-      const doc = await getDocs(q);
-      const data = doc.docs[0].data();
-
-      setName(data.name);
-    } catch (err) {
-      console.error(err);
-      alert("An error occured while fetching user data");
-    }
-  };
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user) return navigate("/");
-
-    fetchUserName();
-  }, [user, loading]);
-
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -252,39 +230,11 @@ function Dashboard() {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <Paper
-            elevation={3}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              textAlign: "center",
-              backgroundColor: "white",
-              padding: "35px",
-            }}
-          >
-            <Typography variant="h6" gutterBottom component="div">
-              Logged in as
-            </Typography>
-            <Typography>{name}</Typography>
-            <Typography>{user?.email}</Typography>
-            <Button
-              variant="contained"
-              style={{
-                color: "white",
-                backgroundColor: "black",
-                padding: "10px",
-                marginTop: "20px",
-                marginBottom: "10px",
-              }}
-              onClick={logout}
-            >
-              Logout
-            </Button>
-          </Paper>
+          <Paper>{children}</Paper>
         </Main>
       </Box>
     </div>
   );
 }
 
-export default Dashboard;
+export default Outer;

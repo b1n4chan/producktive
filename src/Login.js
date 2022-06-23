@@ -3,15 +3,26 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, logInWithEmailAndPassword, signInWithGoogle } from "./firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import "./Login.css";
-//material ui stuff
-import { Typography, Button, Box, TextField, Paper } from "@mui/material";
+import {
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, loading, error] = useAuthState(auth);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
   useEffect(() => {
     if (loading) {
@@ -35,6 +46,7 @@ function Login() {
       >
         <h1>WELCOME!</h1>
         <TextField
+          sx={{ marginBottom: "10px" }}
           id="outlined-basic"
           label="E-mail Address"
           variant="outlined"
@@ -43,10 +55,24 @@ function Login() {
         />
         <TextField
           id="outlined-basic"
+          type={showPassword ? "text" : "password"}
           label="Password"
           variant="outlined"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <Button
           variant="contained"
@@ -57,7 +83,6 @@ function Login() {
             marginTop: "20px",
             marginBottom: "10px",
           }}
-          //className="login__btn"
           onClick={() => logInWithEmailAndPassword(email, password)}
         >
           Login
@@ -69,7 +94,6 @@ function Login() {
             padding: "10px",
             marginBottom: "10px",
           }}
-          //className="login__btn login__google"
           onClick={signInWithGoogle}
         >
           Login with Google
