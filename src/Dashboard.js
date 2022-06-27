@@ -7,7 +7,7 @@ import { query, collection, getDocs, where } from "firebase/firestore";
 import { styled, useTheme } from "@mui/material/styles";
 import {
   Typography,
-  Button,
+  TextField,
   Paper,
   Toolbar,
   IconButton,
@@ -32,7 +32,9 @@ import NotesIcon from "@mui/icons-material/Notes";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MuiAppBar from "@mui/material/AppBar";
-import Deadline from "./Deadline";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const drawerWidth = 240;
 
@@ -143,6 +145,89 @@ function Dashboard() {
     navigate("/notes");
   };
 
+  function getStatement(n) {
+    if (n.length === 0) {
+      return <Typography>Please input a deadline first.</Typography>;
+    } else {
+      return (
+        <Typography>
+          {" "}
+          You have{" "}
+          <strong>
+            {n} day{n === 1 ? "" : "s"}
+          </strong>{" "}
+          left.
+        </Typography>
+      );
+    }
+  }
+
+  function DeadlineBox() {
+    const [message, setMessage] = useState("");
+    const [value, setValue] = React.useState(null);
+    const handleChange = (end) => {
+      setValue(end);
+      const date1 = new Date();
+      const date2 = new Date(end);
+      const diffInTime = date2.getTime() - date1.getTime();
+      const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
+      setMessage(diffInDays);
+    };
+
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          textAlign: "center",
+          alignItems: "center",
+          backgroundColor: "white",
+          padding: "35px",
+        }}
+      >
+        <h2>Countdown</h2>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Enter project deadline"
+            inputFormat="dd/MM/yyyy"
+            value={value}
+            onChange={(newValue) => {
+              handleChange(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
+        <p>{getStatement(message)}</p>
+      </Paper>
+    );
+  }
+
+  function OverviewBox() {
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          textAlign: "center",
+          backgroundColor: "white",
+          padding: "35px",
+        }}
+      >
+        <h2>Overview</h2>
+        <Typography>
+          Welcome back <strong>{name}</strong>!
+        </Typography>
+        <p>
+          <Typography>
+            You have <strong>0 tasks</strong> that are not complete.
+          </Typography>
+        </p>
+      </Paper>
+    );
+  }
+
   return (
     <div className="dashboard">
       <Box sx={{ display: "flex" }}>
@@ -252,35 +337,21 @@ function Dashboard() {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <Paper
-            elevation={3}
+          <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              textAlign: "center",
-              backgroundColor: "white",
-              padding: "35px",
+              alignItems: "center",
+              justifyItems: "center",
             }}
           >
-            <Typography variant="h6" gutterBottom component="div">
-              Logged in as
-            </Typography>
-            <Typography>{name}</Typography>
-            <Typography>{user?.email}</Typography>
-            <Button
-              variant="contained"
-              style={{
-                color: "white",
-                backgroundColor: "black",
-                padding: "10px",
-                marginTop: "20px",
-                marginBottom: "10px",
-              }}
-              onClick={logout}
-            >
-              Logout
-            </Button>
-          </Paper>
+            <div className="rowC">
+              <OverviewBox />
+            </div>
+            <div className="rowC">
+              <DeadlineBox />
+            </div>
+          </Box>
         </Main>
       </Box>
     </div>

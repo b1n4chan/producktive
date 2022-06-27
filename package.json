@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@date-io/date-fns": "^2.14.0",
     "@devexpress/dx-react-core": "^3.0.3",
     "@devexpress/dx-react-scheduler": "^3.0.3",
     "@devexpress/dx-react-scheduler-material-ui": "^3.0.3",
@@ -16,7 +17,9 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/date-fns": "^2.6.0",
     "clsx": "latest",
+    "date-fns": "^2.28.0",
     "devextreme": "^21.2.4",
     "devextreme-react": "^21.2.4",
     "firebase": "^9.8.1",

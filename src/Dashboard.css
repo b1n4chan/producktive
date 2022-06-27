@@ -27,3 +27,10 @@
 .dashboard div {
   margin-top: 0px;
 }
+
+.rowC {
+  display: flex;
+  flex-direction: row;
+  margin: 1rem;
+  padding: 1rem;
+}
