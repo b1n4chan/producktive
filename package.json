@@ -30,11 +30,13 @@
     "react-icons": "^4.4.0",
     "react-loading-skeleton": "^3.1.0",
     "react-redux": "^8.0.2",
+    "react-redux-firebase": "^3.11.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-textarea-autosize": "^8.3.4",
     "react-trello": "^2.2.11",
     "redux": "^4.2.0",
+    "redux-firestore": "^1.0.0",
     "shortid": "^2.2.16",
     "web-vitals": "^2.1.4"
   },

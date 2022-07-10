@@ -20,6 +20,8 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyDceaT7qoZNKTuozDTqvcq5cc9blcNepso",
   authDomain: "producktive-41cdf.firebaseapp.com",
+  databaseURL:
+    "https://producktive-41cdf-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "producktive-41cdf",
   storageBucket: "producktive-41cdf.appspot.com",
   messagingSenderId: "983760558231",
@@ -95,6 +97,7 @@ const logout = () => {
 const getUser = () => auth.currentUser;
 
 export {
+  app,
   auth,
   db,
   getUser,

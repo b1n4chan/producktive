@@ -5,6 +5,8 @@
   align-items: center;
   justify-content: center;
   background-color: #f4e9ba;
+  background-image: url("./bg5.png");
+  background-repeat: no-repeat;
 }
 
 .login__container {

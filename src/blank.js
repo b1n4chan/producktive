@@ -2,7 +2,6 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import "./Deadline.css";
 import Outer from "./Outer";
-import { db } from "./firebase";
 import { ViewState, EditingState } from "@devexpress/dx-react-scheduler";
 import {
   Scheduler,
