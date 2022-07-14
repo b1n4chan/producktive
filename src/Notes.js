@@ -27,6 +27,7 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Fab,
 } from "@mui/material";
 
 function FormDialog({
@@ -41,14 +42,16 @@ function FormDialog({
   setCategory,
 }) {
   const [newCategory, setNewCategory] = useState("");
+  const [user, loading, error] = useAuthState(auth);
   const addNewCategory = async () => {
     try {
       await addDoc(collection(db, "category"), {
         category: newCategory,
+        uid: user.uid,
       });
       setCategory(newCategory);
       setSuccessC(true);
-      alert("Category Added");
+      /*alert("Category Added");*/
     } catch (error) {
       alert("Category could not be added");
     }
@@ -95,7 +98,7 @@ function FormDialog({
               autoFocus
               margin="dense"
               id="name"
-              label="Add new Category"
+              label="Add new category"
               type="text"
               fullWidth
               value={newCategory}
@@ -140,7 +143,7 @@ const Notes = () => {
   const fetchNotes = async () => {
     try {
       const q = query(collection(db, "notes"), where("uid", "==", user?.uid));
-      const c = query(collection(db, "category"));
+      const c = query(collection(db, "category"), where("uid", "==", user?.uid));
       const doc = await getDocs(q);
       const cDoc = await getDocs(c);
       let n = [];
@@ -180,7 +183,7 @@ const Notes = () => {
       });
       setOpen(false);
       setSuccessC(!successC);
-      alert("Note Added");
+      /*alert("Note Added");*/
     } catch (error) {
       alert("Note could not be added");
     }
@@ -191,7 +194,7 @@ const Notes = () => {
       if (window.confirm("Do you want to delete note?")) {
         await deleteDoc(doc(db, "notes", e.id));
         setSuccesD(!successD);
-        alert("Note Deleted");
+        /*alert("Note Deleted");*/
       }
     } catch (error) {
       console.log(error);
@@ -206,7 +209,7 @@ const Notes = () => {
       });
       setSuccessU(true);
       setEdit(false);
-      alert("Note updated");
+      /*alert("Note updated");*/
     } catch (error) {
       console.log(error);
       alert("Note could not be updated");
@@ -219,9 +222,9 @@ const Notes = () => {
   }, [user, loading, successC, successD, successU]);
   return (
     <Outer>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Fab variant="extended" className="fab" onClick={handleClickOpen}>
         Add Note
-      </Button>
+      </Fab>
       <FormDialog
         open={open}
         addNote={addNote}
@@ -236,6 +239,7 @@ const Notes = () => {
       />
       <div className="notesContainer">
         {notes.map((e) => (
+          
           <Paper
             elevation={2}
             sx={{
@@ -249,10 +253,7 @@ const Notes = () => {
               height: "400px",
             }}
           >
-            <Typography variant="h6" gutterBottom component="div">
-              Note
-            </Typography>
-            <Typography>
+            <Typography variant="h6">
               {e.note}
 
               {edit && (

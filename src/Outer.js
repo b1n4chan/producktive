@@ -230,7 +230,7 @@ function Outer(props) {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <Paper>{children}</Paper>
+          <div>{children}</div>
         </Main>
       </Box>
     </div>
