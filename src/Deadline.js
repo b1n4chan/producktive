@@ -2,6 +2,15 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import "./Deadline.css";
 import Outer from "./Outer";
+import {
+  query,
+  collection,
+  onSnapshot,
+  deleteDoc,
+  addDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "./firebase";
 import { ViewState, EditingState } from "@devexpress/dx-react-scheduler";
 import {
   Scheduler,
@@ -42,7 +51,7 @@ import Close from "@mui/icons-material/Close";
 import CalendarToday from "@mui/icons-material/CalendarToday";
 import Create from "@mui/icons-material/Create";
 
-import { appointments } from "./appointments";
+import { useLocation } from "react-router-dom";
 
 const PREFIX = "Demo";
 const classes = {
@@ -291,7 +300,7 @@ export default class Demo extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      data: appointments,
+      data: [],
       //currentDate: "2022-06-25",
       confirmationVisible: false,
       editingFormVisible: false,
@@ -348,6 +357,30 @@ export default class Demo extends React.PureComponent {
     });
   }
 
+  fetchEvents = async () => {
+    try {
+      const q = query(collection(db, "projects", "1657786551723", "events"));
+
+      onSnapshot(q, (doc) => {
+        this.setState({
+          data: doc.docs.map((doc) => ({
+            id: doc.id,
+            startDate: doc.data().startDate.toDate(),
+            endDate: doc.data().endDate.toDate(),
+            title: doc.data().title,
+          })),
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      alert("An error occured while fetching events");
+    }
+  };
+
+  componentDidMount() {
+    this.fetchEvents();
+  }
+
   componentDidUpdate() {
     this.appointmentForm.update();
   }
@@ -383,7 +416,22 @@ export default class Demo extends React.PureComponent {
     this.setState({ confirmationVisible: !confirmationVisible });
   }
 
+  deleteEvent = async () => {
+    try {
+      const { deletedAppointmentId } = this.state;
+      await deleteDoc(
+        doc(db, "projects", "1657786551723", "events", deletedAppointmentId)
+      );
+    } catch (error) {
+      console.log(error);
+      alert("Event could not be deleted");
+    }
+    this.setDeletedAppointmentId(null);
+    this.toggleConfirmationVisible();
+  };
+
   commitDeletedAppointment() {
+    //delete??
     this.setState((state) => {
       const { data, deletedAppointmentId } = state;
       const nextData = data.filter(
@@ -392,16 +440,31 @@ export default class Demo extends React.PureComponent {
 
       return { data: nextData, deletedAppointmentId: null };
     });
+
     this.toggleConfirmationVisible();
   }
+
+  addEvent = async (event) => {
+    console.log(event);
+    try {
+      await addDoc(collection(db, "projects", "1657786551723", "events"), {
+        title: " 1",
+        startDate: new Date(2022, 7, 16, 9, 30),
+        endDate: new Date(2022, 7, 16, 11, 30),
+      });
+    } catch (error) {
+      alert("Event could not be added");
+    }
+  };
 
   commitChanges({ added, changed, deleted }) {
     this.setState((state) => {
       let { data } = state;
       if (added) {
-        const startingAddedId =
+        /*const startingAddedId =
           data.length > 0 ? data[data.length - 1].id + 1 : 0;
-        data = [...data, { id: startingAddedId, ...added }];
+        data = [...data, { id: startingAddedId, ...added }];*/
+        this.addEvent(...added);
       }
       if (changed) {
         data = data.map((appointment) =>
@@ -471,7 +534,7 @@ export default class Demo extends React.PureComponent {
               Cancel
             </Button>
             <Button
-              onClick={this.commitDeletedAppointment}
+              onClick={this.deleteEvent}
               color="secondary"
               variant="outlined"
             >

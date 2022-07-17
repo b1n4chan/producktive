@@ -78,8 +78,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-function OuterTask(props) {
-  const { children } = props;
+function OuterTask({ children, projectName, projectId }) {
   const [user, loading] = useAuthState(auth);
   const [name, setName] = useState("");
   const navigate = useNavigate();
@@ -124,15 +123,21 @@ function OuterTask(props) {
   };
 
   const toHome = () => {
-    navigate("/dashboard");
+    navigate("/home", {
+      state: { projectName: projectName, projectId: projectId },
+    });
   };
 
   const toDeadline = () => {
-    navigate("/deadline");
+    navigate("/deadline", {
+      state: { projectName: projectName, projectId: projectId },
+    });
   };
 
   const toTask = () => {
-    navigate("/task");
+    navigate("/task", {
+      state: { projectName: projectName, projectId: projectId },
+    });
   };
 
   const toNotes = () => {

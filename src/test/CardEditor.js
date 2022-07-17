@@ -2,7 +2,7 @@ import "./CardEditor.css";
 
 import React, { Component } from "react";
 import EditButtons from "./EditButtons";
-import Input from "@mui/material/Input";
+import { Paper, Input } from "@mui/material";
 
 class CardEditor extends Component {
   state = {
@@ -25,17 +25,19 @@ class CardEditor extends Component {
     const { onSave, onCancel, onDelete, adding } = this.props;
 
     return (
-      <div className="editCard">
-        <div className="Card">
-          <Input
-            placeholder="Enter task"
-            autoFocus
-            className="editCardTextarea"
-            value={text}
-            onChange={this.handleChangeText}
-            onKeyDown={this.onEnter}
-            multiline={2}
-          />
+      <div>
+        <div className="editCard-Card">
+          <Paper sx={{ background: "#fae29c;", p: 2 }}>
+            <Input
+              placeholder="Enter task"
+              autoFocus
+              className="editCard-Textarea"
+              value={text}
+              onChange={this.handleChangeText}
+              onKeyDown={this.onEnter}
+              multiline
+            />
+          </Paper>
         </div>
         <EditButtons
           handleSave={() => onSave(text)}

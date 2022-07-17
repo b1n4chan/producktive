@@ -25,9 +25,17 @@ class Card extends Component {
   endEditing = () => this.setState({ hover: false, editing: false });
 
   editCard = async (text) => {
-    const { card, listId } = this.props;
+    const { card, listId, projectId } = this.props;
     try {
-      const ref = doc(db, "lists", listId, "tasks", card.id);
+      const ref = doc(
+        db,
+        "projects",
+        projectId,
+        "lists",
+        listId,
+        "tasks",
+        card.id
+      );
       await updateDoc(ref, {
         task: text,
       });
@@ -39,9 +47,11 @@ class Card extends Component {
   };
 
   deleteCard = async () => {
-    const { card, listId } = this.props;
+    const { card, listId, projectId } = this.props;
     try {
-      await deleteDoc(doc(db, "lists", listId, "tasks", card.id));
+      await deleteDoc(
+        doc(db, "projects", projectId, "lists", listId, "tasks", card.id)
+      );
     } catch (error) {
       console.log(error);
       alert("Task could not be deleted");

@@ -2,35 +2,14 @@
   height: 100vh;
   width: 100vw;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   background-color: #f4e9ba;
+  background-image: url("./feature.png");
 }
 
-.dashboard__container {
+.flexContainer {
   display: flex;
-  flex-direction: column;
-  text-align: center;
-  background-color: #dcdcdc;
-  padding: 30px;
-}
-
-.dashboard__btn {
-  padding: 10px;
-  font-size: 18px;
-  margin-top: 10px;
-  border: none;
-  color: white;
-  background-color: black;
-}
-
-.dashboard div {
-  margin-top: 0px;
-}
-
-.rowC {
-  display: flex;
-  flex-direction: row;
-  margin: 1rem;
-  padding: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }

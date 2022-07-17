@@ -1,5 +1,6 @@
 .outertask {
   display: flex;
   background-color: #f4e9ba;
+  background-image: url("../feature.png");
   height: 100vh;
 }

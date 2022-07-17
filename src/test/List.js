@@ -12,6 +12,7 @@ import {
   deleteDoc,
   Timestamp,
   orderBy,
+  getDocs,
 } from "firebase/firestore";
 import ListEditor from "./ListEditor";
 import CardEditor from "./CardEditor";
@@ -25,12 +26,14 @@ class List extends Component {
     tasks: [],
   };
 
-  fetchTasks = () => {
+  fetchTasks = async () => {
+    const { listId, projectId } = this.props;
     try {
       const q = query(
-        collection(db, "lists", this.props.list.id, "tasks"),
+        collection(db, "projects", projectId, "lists", listId, "tasks"),
         orderBy("created", "asc")
       );
+
       onSnapshot(q, (doc) => {
         this.setState({
           tasks: doc.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
@@ -46,14 +49,17 @@ class List extends Component {
     this.setState({ addingCard: !this.state.addingCard });
 
   addCard = async (cardText) => {
-    const { listId } = this.props;
+    const { listId, projectId } = this.props;
     try {
       let identify = Date.now().toString();
-      await addDoc(collection(db, "lists", listId, "tasks"), {
-        id: identify,
-        task: cardText,
-        created: Timestamp.now(),
-      });
+      await addDoc(
+        collection(db, "projects", projectId, "lists", listId, "tasks"),
+        {
+          id: identify,
+          task: cardText,
+          created: Timestamp.now(),
+        }
+      );
       this.toggleAddingCard();
     } catch (error) {
       alert("Task could not be added");
@@ -66,10 +72,10 @@ class List extends Component {
   handleChangeTitle = (e) => this.setState({ title: e.target.value });
 
   updateList = async () => {
-    const { listId } = this.props;
+    const { listId, projectId } = this.props;
     const { title } = this.state;
     try {
-      const ref = doc(db, "lists", listId);
+      const ref = doc(db, "projects", projectId, "lists", listId);
       await updateDoc(ref, {
         name: title,
       });
@@ -81,9 +87,9 @@ class List extends Component {
   };
 
   deleteList = async () => {
-    const { listId } = this.props;
+    const { listId, projectId } = this.props;
     try {
-      await deleteDoc(doc(db, "lists", listId));
+      await deleteDoc(doc(db, "projects", projectId, "lists", listId));
     } catch (error) {
       console.log(error);
       alert("List could not be deleted");
@@ -95,7 +101,7 @@ class List extends Component {
   }
 
   render() {
-    const { list, listId } = this.props;
+    const { list, listId, projectId } = this.props;
     const { editingTitle, addingCard, title, tasks } = this.state;
 
     return (
@@ -122,6 +128,7 @@ class List extends Component {
                 key={task.id}
                 cardId={task.id}
                 listId={listId}
+                projectId={projectId}
                 card={task}
               />
             ))}
