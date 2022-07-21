@@ -3,6 +3,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import Outer from "./Outer";
+import { styled } from "@mui/material/styles";
 import {
   query,
   collection,
@@ -27,7 +28,9 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Fab,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 function FormDialog({
   open,
@@ -41,18 +44,24 @@ function FormDialog({
   setCategory,
 }) {
   const [newCategory, setNewCategory] = useState("");
+  const [user, loading, error] = useAuthState(auth);
+  const location = useLocation();
+  const projectName = location.state.projectName;
+  const projectId = location.state.projectId;
   const addNewCategory = async () => {
     try {
-      await addDoc(collection(db, "category"), {
+      await addDoc(collection(db, "projects", projectId, "category"), {
         category: newCategory,
+        uid: user.uid,
       });
       setCategory(newCategory);
       setSuccessC(true);
-      alert("Category Added");
+      /*alert("Category Added");*/
     } catch (error) {
       alert("Category could not be added");
     }
   };
+  
   return (
     <div>
       <Dialog open={open} onClose={handleClose}>
@@ -95,7 +104,7 @@ function FormDialog({
               autoFocus
               margin="dense"
               id="name"
-              label="Add new Category"
+              label="Add new category"
               type="text"
               fullWidth
               value={newCategory}
@@ -137,10 +146,75 @@ const Notes = () => {
   const [categories, setCateogories] = useState([]);
   const [category, setCategory] = useState("Select Category");
   const navigate = useNavigate();
+  const location = useLocation();
+  const projectName = location.state.projectName;
+  const projectId = location.state.projectId;
+  const PREFIX = "Demo";
+const classes = {
+  content: `${PREFIX}-content`,
+  header: `${PREFIX}-header`,
+  closeButton: `${PREFIX}-closeButton`,
+  buttonGroup: `${PREFIX}-buttonGroup`,
+  button: `${PREFIX}-button`,
+  picker: `${PREFIX}-picker`,
+  wrapper: `${PREFIX}-wrapper`,
+  icon: `${PREFIX}-icon`,
+  textField: `${PREFIX}-textField`,
+  addButton: `${PREFIX}-addButton`,
+};
+
+const StyledDiv = styled("div")(({ theme }) => ({
+  [`& .${classes.icon}`]: {
+    margin: theme.spacing(2, 0),
+    marginRight: theme.spacing(2),
+  },
+  [`& .${classes.header}`]: {
+    overflow: "hidden",
+    paddingTop: theme.spacing(0.5),
+  },
+  [`& .${classes.textField}`]: {
+    width: "100%",
+  },
+  [`& .${classes.content}`]: {
+    padding: theme.spacing(2),
+    paddingTop: 0,
+  },
+  [`& .${classes.closeButton}`]: {
+    float: "right",
+  },
+  [`& .${classes.picker}`]: {
+    marginRight: theme.spacing(2),
+    "&:last-child": {
+      marginRight: 0,
+    },
+    width: "50%",
+  },
+  [`& .${classes.wrapper}`]: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: theme.spacing(1, 0),
+  },
+  [`& .${classes.buttonGroup}`]: {
+    display: "flex",
+    justifyContent: "flex-end",
+    padding: theme.spacing(0, 2),
+  },
+  [`& .${classes.button}`]: {
+    marginLeft: theme.spacing(2),
+  },
+}));
+const StyledFab = styled(Fab)(({ theme }) => ({
+  [`&.${classes.addButton}`]: {
+    backgroundColor: "#febb58",
+    position: "absolute",
+    bottom: theme.spacing(3),
+    right: theme.spacing(4),
+  },
+}));
   const fetchNotes = async () => {
     try {
-      const q = query(collection(db, "notes"), where("uid", "==", user?.uid));
-      const c = query(collection(db, "category"));
+      const q = query(collection(db, "projects", projectId, "notes"), where("uid", "==", user?.uid));
+      const c = query(collection(db, "projects", projectId, "category"), where("uid", "==", user?.uid));
       const doc = await getDocs(q);
       const cDoc = await getDocs(c);
       let n = [];
@@ -180,7 +254,7 @@ const Notes = () => {
       });
       setOpen(false);
       setSuccessC(!successC);
-      alert("Note Added");
+      /*alert("Note Added");*/
     } catch (error) {
       alert("Note could not be added");
     }
@@ -191,7 +265,7 @@ const Notes = () => {
       if (window.confirm("Do you want to delete note?")) {
         await deleteDoc(doc(db, "notes", e.id));
         setSuccesD(!successD);
-        alert("Note Deleted");
+        /*alert("Note Deleted");*/
       }
     } catch (error) {
       console.log(error);
@@ -206,7 +280,7 @@ const Notes = () => {
       });
       setSuccessU(true);
       setEdit(false);
-      alert("Note updated");
+      /*alert("Note updated");*/
     } catch (error) {
       console.log(error);
       alert("Note could not be updated");
@@ -219,9 +293,16 @@ const Notes = () => {
   }, [user, loading, successC, successD, successU]);
   return (
     <Outer>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Add Note
-      </Button>
+      <div>
+        <StyledFab
+          color="#febb58"
+          className={classes.addButton}
+          onClick={handleClickOpen}
+          variant="extended"
+        >
+          Add Note
+        </StyledFab>
+      </div>
       <FormDialog
         open={open}
         addNote={addNote}
@@ -236,6 +317,7 @@ const Notes = () => {
       />
       <div className="notesContainer">
         {notes.map((e) => (
+          
           <Paper
             elevation={2}
             sx={{
@@ -249,10 +331,7 @@ const Notes = () => {
               height: "400px",
             }}
           >
-            <Typography variant="h6" gutterBottom component="div">
-              Note
-            </Typography>
-            <Typography>
+            <Typography variant="h6">
               {e.note}
 
               {edit && (

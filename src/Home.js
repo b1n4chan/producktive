@@ -208,6 +208,7 @@ function DeadlineBox({ projectId }) {
       <h2>Countdown</h2>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DatePicker
+          disablePast
           label="Input project deadline"
           inputFormat="dd/MM/yyyy"
           value={value}
@@ -300,7 +301,9 @@ function Home() {
   };
 
   const toNotes = () => {
-    navigate("/notes");
+    navigate("/notes", {
+      state: { projectName: currentProjectName, projectId: currentProjectId },
+    });
   };
 
   function OverviewBox() {
@@ -317,7 +320,7 @@ function Home() {
       >
         <h2>Overview</h2>
         <Typography>
-          Welcome back <strong>{name}</strong>!
+          Quack <strong>{name}</strong>!
         </Typography>
         <p>
           <Typography marginBottom={2}>
