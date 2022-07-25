@@ -21,6 +21,7 @@ class ListEditor extends Component {
           id="edit-name"
           label="Name"
           variant="outlined"
+          multiline
           margin="dense"
           value={title}
           onChange={handleChangeTitle}

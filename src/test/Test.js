@@ -14,12 +14,11 @@ import "./Test.css";
 import OuterTask from "./OuterTask";
 import AddList from "./AddList";
 import List from "./List";
-import loader from "../walkingduck.gif";
 import { useLocation } from "react-router-dom";
 
 function Test() {
   const [user] = useAuthState(auth);
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
   const [addingList, setAddingList] = useState(false);
   const [lists, setLists] = useState([]);
   const toggleAddingList = () => setAddingList(!addingList);
@@ -35,20 +34,20 @@ function Test() {
         collection(db, "projects", projectId, "lists"),
         orderBy("created", "asc")
       );
-      const docs = await getDocs(q);
-      if (docs.docs.length !== 0) {
-        onSnapshot(q, (doc) => {
-          setLists(
-            doc.docs.map((doc) => ({
-              id: doc.id,
-              data: doc.data(),
-            }))
-          );
-        });
-      }
-      setTimeout(function () {
+      //const docs = await getDocs(q);
+      //if (docs.docs.length !== 0) {
+      onSnapshot(q, (doc) => {
+        setLists(
+          doc.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+        );
+      });
+      //}
+      /*setTimeout(function () {
         setLoading(false);
-      }, 1000);
+      }, 1000);*/
     } catch (err) {
       console.error(err);
       alert("An error occured while fetching lists");
@@ -56,50 +55,43 @@ function Test() {
   };
 
   useEffect(() => {
-    //if (loading) return;
-    setLoading(true);
+    //setLoading(true);
     fetchLists();
   }, [user]);
 
   return (
     <OuterTask projectName={projectName} projectId={projectId}>
-      {loading ? (
-        <div className="loading">
-          <img src={loader} alt="Loading..." />
-        </div>
-      ) : (
-        <div className="flexContainer">
-          {lists.map((list) => (
-            <List
-              key={list.id}
-              list={list}
-              listId={list.id}
+      <div className="flexContainer">
+        {lists.map((list) => (
+          <List
+            key={list.id}
+            list={list}
+            listId={list.id}
+            projectId={projectId}
+          />
+        ))}
+        <div className="addList">
+          {addingList ? (
+            <AddList
+              toggleAddingList={toggleAddingList}
               projectId={projectId}
             />
-          ))}
-          <div className="addList">
-            {addingList ? (
-              <AddList
-                toggleAddingList={toggleAddingList}
-                projectId={projectId}
-              />
-            ) : (
-              <Button
-                variant="contained"
-                onClick={toggleAddingList}
-                sx={{
-                  width: "300px",
-                  backgroundColor: "rgba(0, 0, 0, 0.25)",
-                  ":hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
-                  //textTransform: "none",
-                }}
-              >
-                + Add name
-              </Button>
-            )}
-          </div>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={toggleAddingList}
+              sx={{
+                width: "300px",
+                backgroundColor: "rgba(0, 0, 0, 0.25)",
+                ":hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+                //textTransform: "none",
+              }}
+            >
+              + Add name
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </OuterTask>
   );
 }

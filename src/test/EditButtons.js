@@ -7,7 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 const EditButtons = ({ handleSave, saveLabel, handleDelete, handleCancel }) => (
   <Box
-    sx={{ "& button": { m: 0.5 } }}
+    sx={{ "& button": { m: 0.5, ml: 0 } }}
     display="flex"
     justifyContent="flex-start"
     alignItems="flex-start"

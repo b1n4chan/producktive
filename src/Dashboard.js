@@ -39,6 +39,11 @@ function FormDialog({ open, handleCancel, fetchProjects }) {
   const [user] = useAuthState(auth);
   const [newProject, setNewProject] = useState("");
   const [existingProject, setExistingProject] = useState("");
+  const handleClose = () => {
+    setNewProject("");
+    setExistingProject("");
+    handleCancel();
+  };
   const addProject = async () => {
     try {
       const q = query(collection(db, "users"), where("uid", "==", user?.uid));
@@ -57,7 +62,7 @@ function FormDialog({ open, handleCancel, fetchProjects }) {
         id: projectId,
       });
       fetchProjects();
-      handleCancel();
+      handleClose();
     } catch (error) {
       console.log(error);
       alert("Project could not be added");
@@ -80,7 +85,7 @@ function FormDialog({ open, handleCancel, fetchProjects }) {
         id: existingProject,
       });
       fetchProjects();
-      handleCancel();
+      handleClose();
     } catch (error) {
       console.log(error);
       alert("Project could not be added");
@@ -88,38 +93,14 @@ function FormDialog({ open, handleCancel, fetchProjects }) {
   };
   return (
     <div>
-      <Dialog open={open} onClose={handleCancel}>
+      <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add Project</DialogTitle>
         <DialogContent sx={{ width: "390px" }}>
-          <DialogContentText>
-            Have a project code? Use the code to add the project! If not, just
-            create a new project.
+          <DialogContentText sx={{ color: "black" }}>
+            Have a project code? Use it to add the project.
           </DialogContentText>
           <FormControl fullWidth sx={{ marginBottom: "25px" }}>
             <TextField
-              autoFocus
-              id="name"
-              label="Project Name"
-              type="text"
-              fullWidth
-              value={newProject}
-              onChange={(e) => setNewProject(e.target.value)}
-              variant="standard"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton aria-label="add" onClick={addProject}>
-                      <AddIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </FormControl>
-          <Typography variant="button">OR</Typography>
-          <FormControl fullWidth>
-            <TextField
-              autoFocus
               id="code"
               label="Project Code"
               type="text"
@@ -138,9 +119,33 @@ function FormDialog({ open, handleCancel, fetchProjects }) {
               }}
             />
           </FormControl>
+          <DialogContentText sx={{ color: "black" }}>
+            No code? Just create a new project!
+          </DialogContentText>
+          <FormControl fullWidth>
+            <TextField
+              id="name"
+              label="Project Name"
+              type="text"
+              fullWidth
+              value={newProject}
+              onChange={(e) => setNewProject(e.target.value)}
+              variant="standard"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton aria-label="add" onClick={addProject}>
+                      <AddIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              inputProps={{ maxLength: 45 }}
+            />
+          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </DialogActions>
       </Dialog>
     </div>
@@ -159,7 +164,6 @@ function Dashboard() {
       const q = query(collection(db, "users"), where("uid", "==", user?.uid));
       const doc = await getDocs(q);
       const data = doc.docs[0].data();
-
       setProjects(data.projects); //get names of all projects created by current user
     } catch (err) {
       console.error(err);
@@ -172,7 +176,6 @@ function Dashboard() {
       const q = query(collection(db, "users"), where("uid", "==", user?.uid));
       const doc = await getDocs(q);
       const data = doc.docs[0].data();
-
       setName(data.name);
     } catch (err) {
       console.error(err);
@@ -266,11 +269,10 @@ function Dashboard() {
           justifyItems: "flex-start",
           marginTop: 10,
           marginLeft: 2,
-          bgcolor: "#f4e9ba",
         }}
       >
         {projects.length !== 0 && (
-          <div>
+          <div className="flexContainer">
             {projects.map((project, key) => (
               <Button
                 key={key}
@@ -279,6 +281,8 @@ function Dashboard() {
                   margin: 1,
                   width: "250px",
                   height: "150px",
+                  wordWrap: "break-word",
+                  whiteSpace: "normal",
                   background: "#fff6e5",
                   color: "black",
                   ":hover": { backgroundColor: "#faefd9" },

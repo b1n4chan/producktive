@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
+import "./Outer.css";
 import { auth, db, logout } from "./firebase";
 import { query, collection, getDocs, where } from "firebase/firestore";
 import { styled, useTheme } from "@mui/material/styles";
@@ -143,11 +143,13 @@ function Outer({ children, projectName, projectId }) {
   };
 
   const toNotes = () => {
-    navigate("/notes");
+    navigate("/notes", {
+      state: { projectName: projectName, projectId: projectId },
+    });
   };
 
   return (
-    <div className="dashboard">
+    <div className="outer">
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar
@@ -255,7 +257,7 @@ function Outer({ children, projectName, projectId }) {
         </Drawer>
         <Main open={open}>
           <DrawerHeader />
-          <Paper>{children}</Paper>
+          {children}
         </Main>
       </Box>
     </div>

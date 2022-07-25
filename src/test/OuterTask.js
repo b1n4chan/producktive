@@ -141,7 +141,9 @@ function OuterTask({ children, projectName, projectId }) {
   };
 
   const toNotes = () => {
-    navigate("/notes");
+    navigate("/notes", {
+      state: { projectName: projectName, projectId: projectId },
+    });
   };
 
   return (

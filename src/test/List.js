@@ -12,7 +12,6 @@ import {
   deleteDoc,
   Timestamp,
   orderBy,
-  getDocs,
 } from "firebase/firestore";
 import ListEditor from "./ListEditor";
 import CardEditor from "./CardEditor";
@@ -50,19 +49,23 @@ class List extends Component {
 
   addCard = async (cardText) => {
     const { listId, projectId } = this.props;
-    try {
-      let identify = Date.now().toString();
-      await addDoc(
-        collection(db, "projects", projectId, "lists", listId, "tasks"),
-        {
-          id: identify,
-          task: cardText,
-          created: Timestamp.now(),
-        }
-      );
-      this.toggleAddingCard();
-    } catch (error) {
-      alert("Task could not be added");
+    if (cardText.length === 0) {
+      alert("Missing field");
+    } else {
+      try {
+        let identify = Date.now().toString();
+        await addDoc(
+          collection(db, "projects", projectId, "lists", listId, "tasks"),
+          {
+            id: identify,
+            task: cardText,
+            created: Timestamp.now(),
+          }
+        );
+        this.toggleAddingCard();
+      } catch (error) {
+        alert("Task could not be added");
+      }
     }
   };
 

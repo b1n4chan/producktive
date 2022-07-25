@@ -8,7 +8,7 @@ import Reset from "./Reset";
 import Home from "./Home";
 import Dashboard from "./Dashboard";
 import Deadline from "./Deadline";
-import Notes from "./Notes";
+import Notes from "./Notes2";
 import Test from "./test/Test";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";

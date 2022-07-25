@@ -8,6 +8,7 @@ import {
   onSnapshot,
   deleteDoc,
   addDoc,
+  setDoc,
   doc,
 } from "firebase/firestore";
 import { db } from "./firebase";
@@ -21,7 +22,6 @@ import {
   Appointments,
   AppointmentTooltip,
   AppointmentForm,
-  DragDropProvider,
   EditRecurrenceMenu,
   AllDayPanel,
   TodayButton,
@@ -29,7 +29,6 @@ import {
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { connectProps } from "@devexpress/dx-react-core";
 import {
-  Paper,
   Dialog,
   DialogActions,
   DialogContent,
@@ -39,19 +38,16 @@ import {
   Fab,
   IconButton,
   TextField,
-  getDialogContentTextUtilityClass,
+  Paper,
 } from "@mui/material";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import AdapterMoment from "@mui/lab/AdapterMoment";
 import AddIcon from "@mui/icons-material/Add";
-import LocationOn from "@mui/icons-material/LocationOn";
-import Notes from "@mui/icons-material/Notes";
 import Close from "@mui/icons-material/Close";
 import CalendarToday from "@mui/icons-material/CalendarToday";
 import Create from "@mui/icons-material/Create";
-
-import { useLocation } from "react-router-dom";
+import { withHooksHOC } from "./withHooksHOC";
 
 const PREFIX = "Demo";
 const classes = {
@@ -109,7 +105,9 @@ const StyledDiv = styled("div")(({ theme }) => ({
 }));
 const StyledFab = styled(Fab)(({ theme }) => ({
   [`&.${classes.addButton}`]: {
-    position: "absolute",
+    backgroundColor: "#ffbd59",
+    color: "#694729",
+    position: "fixed",
     bottom: theme.spacing(3),
     right: theme.spacing(4),
   },
@@ -241,7 +239,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
           <div className={classes.content}>
             <div className={classes.wrapper}>
               <Create className={classes.icon} color="action" />
-              <TextField {...textEditorProps("title")} />
+              <TextField required {...textEditorProps("title")} />
             </div>
             <div className={classes.wrapper}>
               <CalendarToday className={classes.icon} color="action" />
@@ -267,7 +265,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
             {!isNewAppointment && (
               <Button
                 variant="outlined"
-                color="secondary"
+                color="error"
                 className={classes.button}
                 onClick={() => {
                   visibleChange();
@@ -296,7 +294,7 @@ class AppointmentFormContainerBasic extends React.PureComponent {
 }
 
 /* eslint-disable-next-line react/no-multi-comp */
-export default class Demo extends React.PureComponent {
+class Deadline extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -308,7 +306,7 @@ export default class Demo extends React.PureComponent {
       editingAppointment: undefined,
       previousAppointment: undefined,
       addedAppointment: {},
-      startDayHour: 9,
+      startDayHour: 8,
       endDayHour: 24,
       isNewAppointment: false,
     };
@@ -359,7 +357,12 @@ export default class Demo extends React.PureComponent {
 
   fetchEvents = async () => {
     try {
-      const q = query(collection(db, "projects", "1657786551723", "events"));
+      //"1657786551723"
+      const { location } = this.props;
+      //console.log(location.state.projectId);
+      const q = query(
+        collection(db, "projects", location.state.projectId, "events")
+      );
 
       onSnapshot(q, (doc) => {
         this.setState({
@@ -419,8 +422,15 @@ export default class Demo extends React.PureComponent {
   deleteEvent = async () => {
     try {
       const { deletedAppointmentId } = this.state;
+      const { location } = this.props;
       await deleteDoc(
-        doc(db, "projects", "1657786551723", "events", deletedAppointmentId)
+        doc(
+          db,
+          "projects",
+          location.state.projectId,
+          "events",
+          deletedAppointmentId
+        )
       );
     } catch (error) {
       console.log(error);
@@ -431,7 +441,6 @@ export default class Demo extends React.PureComponent {
   };
 
   commitDeletedAppointment() {
-    //delete??
     this.setState((state) => {
       const { data, deletedAppointmentId } = state;
       const nextData = data.filter(
@@ -445,15 +454,44 @@ export default class Demo extends React.PureComponent {
   }
 
   addEvent = async (event) => {
-    console.log(event);
     try {
-      await addDoc(collection(db, "projects", "1657786551723", "events"), {
-        title: " 1",
-        startDate: new Date(2022, 7, 16, 9, 30),
-        endDate: new Date(2022, 7, 16, 11, 30),
-      });
+      const { location } = this.props;
+      if (event.startDate.getTime() === event.endDate.getTime()) {
+        alert("Start and end datetimes cannot be the same");
+      } else {
+        await addDoc(
+          collection(db, "projects", location.state.projectId, "events"),
+          {
+            title: event.title,
+            startDate: event.startDate,
+            endDate: event.endDate,
+          }
+        );
+      }
     } catch (error) {
       alert("Event could not be added");
+    }
+  };
+
+  updateEvent = async (updatedEvent) => {
+    try {
+      const { editingAppointment } = this.state;
+      const { location } = this.props;
+      const ref = doc(
+        db,
+        "projects",
+        location.state.projectId,
+        "events",
+        editingAppointment.id
+      );
+      await setDoc(ref, {
+        title: updatedEvent.title,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+      });
+    } catch (error) {
+      console.log(error);
+      alert("Event could not be updated");
     }
   };
 
@@ -464,14 +502,16 @@ export default class Demo extends React.PureComponent {
         /*const startingAddedId =
           data.length > 0 ? data[data.length - 1].id + 1 : 0;
         data = [...data, { id: startingAddedId, ...added }];*/
-        this.addEvent(...added);
+        this.addEvent({ ...added });
       }
       if (changed) {
-        data = data.map((appointment) =>
+        /*data = data.map((appointment) =>
           changed[appointment.id]
             ? { ...appointment, ...changed[appointment.id] }
             : appointment
-        );
+        );*/
+        const { editingAppointment } = this.state;
+        this.updateEvent({ ...changed[editingAppointment.id] });
       }
       if (deleted !== undefined) {
         this.setDeletedAppointmentId(deleted);
@@ -491,73 +531,83 @@ export default class Demo extends React.PureComponent {
       endDayHour,
     } = this.state;
 
+    const { location } = this.props;
+    const projectId = location.state.projectId;
+    const projectName = location.state.projectName;
+
     return (
-      <Outer>
-        <Scheduler data={data} height={700}>
-          <ViewState currentDate={currentDate} />
-          <EditingState
-            onCommitChanges={this.commitChanges}
-            onEditingAppointmentChange={this.onEditingAppointmentChange}
-            onAddedAppointmentChange={this.onAddedAppointmentChange}
-          />
-          <WeekView startDayHour={startDayHour} endDayHour={endDayHour} />
-          <MonthView />
-          <AllDayPanel />
-          <EditRecurrenceMenu />
-          <Appointments />
-          <AppointmentTooltip showOpenButton showCloseButton showDeleteButton />
-          <Toolbar />
-          <DateNavigator />
-          <TodayButton />
-          <ViewSwitcher />
-          <AppointmentForm
-            overlayComponent={this.appointmentForm}
-            visible={editingFormVisible}
-            onVisibilityChange={this.toggleEditingFormVisibility}
-          />
-          <DragDropProvider />
-        </Scheduler>
+      <Outer projectName={projectName} projectId={projectId}>
+        <Paper>
+          <Scheduler data={data} height={700}>
+            <ViewState currentDate={currentDate} />
+            <EditingState
+              onCommitChanges={this.commitChanges}
+              onEditingAppointmentChange={this.onEditingAppointmentChange}
+              onAddedAppointmentChange={this.onAddedAppointmentChange}
+            />
+            <WeekView startDayHour={startDayHour} endDayHour={endDayHour} />
+            <MonthView />
+            <AllDayPanel />
+            <EditRecurrenceMenu />
+            <Appointments />
+            <AppointmentTooltip
+              showOpenButton
+              showCloseButton
+              showDeleteButton
+            />
+            <Toolbar />
+            <DateNavigator />
+            <TodayButton />
+            <ViewSwitcher />
+            <AppointmentForm
+              overlayComponent={this.appointmentForm}
+              visible={editingFormVisible}
+              onVisibilityChange={this.toggleEditingFormVisibility}
+            />
+          </Scheduler>
 
-        <Dialog open={confirmationVisible} onClose={this.cancelDelete}>
-          <DialogTitle>Delete Appointment</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this appointment?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={this.toggleConfirmationVisible}
-              color="primary"
-              variant="outlined"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={this.deleteEvent}
-              color="secondary"
-              variant="outlined"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <Dialog open={confirmationVisible} onClose={this.cancelDelete}>
+            <DialogTitle>Delete Event</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this event?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={this.toggleConfirmationVisible}
+                color="primary"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={this.deleteEvent}
+                color="error"
+                variant="outlined"
+              >
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-        <StyledFab
-          color="secondary"
-          className={classes.addButton}
-          onClick={() => {
-            this.setState({ editingFormVisible: true });
-            this.onEditingAppointmentChange(undefined);
-            this.onAddedAppointmentChange({
-              startDate: new Date(),
-              endDate: new Date(),
-            });
-          }}
-        >
-          <AddIcon />
-        </StyledFab>
+          <StyledFab
+            className={classes.addButton}
+            onClick={() => {
+              this.setState({ editingFormVisible: true });
+              this.onEditingAppointmentChange(undefined);
+              this.onAddedAppointmentChange({
+                startDate: new Date(),
+                endDate: new Date(), //new Date(),
+              });
+            }}
+          >
+            <AddIcon />
+          </StyledFab>
+        </Paper>
       </Outer>
     );
   }
 }
+
+export default withHooksHOC(Deadline);

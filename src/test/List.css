@@ -13,6 +13,7 @@
 .listTitle {
   cursor: pointer;
   overflow-wrap: break-word;
+  padding: 5px;
   padding-top: 15px;
   padding-bottom: 5px;
   font-weight: bold;

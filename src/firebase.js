@@ -29,6 +29,15 @@ const firebaseConfig = {
   measurementId: "G-VM1L5FYM02",
 };
 
+/*const firebaseConfig = {
+  apiKey: "AIzaSyBgzYtdOSsSSmMVvq6twm5oP9jtG8dgoo4",
+  authDomain: "backup1-1f86a.firebaseapp.com",
+  projectId: "backup1-1f86a",
+  storageBucket: "backup1-1f86a.appspot.com",
+  messagingSenderId: "576513805591",
+  appId: "1:576513805591:web:ae62a0513f029d90c23b52",
+};*/
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);

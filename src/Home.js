@@ -176,20 +176,20 @@ function DeadlineBox({ projectId }) {
     if (isDate(end) && diffInDays >= 0) {
       setValue(end);
       setMessage(diffInDays);
-    } //might need to add warning for invalid date (e.g string), dates in the past,
-    // also what will happen if deadline is over, reset?
-    try {
-      const dateRef = doc(db, "projects", projectId, "deadline", "date");
-      await setDoc(
-        dateRef,
-        {
-          deadline: end,
-        },
-        { merge: true }
-      );
-    } catch (error) {
-      console.log(error);
-      alert("Date could not be updated.");
+
+      try {
+        const dateRef = doc(db, "projects", projectId, "deadline", "date");
+        await setDoc(
+          dateRef,
+          {
+            deadline: end,
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.log(error);
+        alert("Date could not be updated.");
+      }
     }
   };
 
@@ -208,8 +208,9 @@ function DeadlineBox({ projectId }) {
       <h2>Countdown</h2>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DatePicker
-          label="Input project deadline"
+          label="Select project deadline"
           inputFormat="dd/MM/yyyy"
+          disablePast
           value={value}
           onChange={(newValue) => {
             handleChange(newValue);
@@ -300,7 +301,9 @@ function Home() {
   };
 
   const toNotes = () => {
-    navigate("/notes");
+    navigate("/notes", {
+      state: { projectName: currentProjectName, projectId: currentProjectId },
+    });
   };
 
   function OverviewBox() {
@@ -313,18 +316,16 @@ function Home() {
           textAlign: "center",
           backgroundColor: "white",
           padding: "35px",
+          width: "300px",
         }}
       >
         <h2>Overview</h2>
         <Typography>
-          Welcome back <strong>{name}</strong>!
+          Quack <strong>{name}</strong>!
         </Typography>
         <p>
           <Typography marginBottom={2}>
             Current Project: <strong>{currentProjectName}</strong>
-          </Typography>
-          <Typography>
-            You have <strong>0 tasks</strong> that are not complete.
           </Typography>
         </p>
       </Paper>

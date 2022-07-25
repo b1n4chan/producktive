@@ -17,16 +17,20 @@ class AddList extends Component {
   addList = async () => {
     const { title } = this.state;
     const { projectId } = this.props;
-    try {
-      let identify = Date.now().toString();
-      await addDoc(collection(db, "projects", projectId, "lists"), {
-        id: identify,
-        name: title,
-        created: Timestamp.now(),
-      });
-      this.props.toggleAddingList();
-    } catch (error) {
-      alert("List could not be added");
+    if (title.length === 0) {
+      alert("Missing field");
+    } else {
+      try {
+        let identify = Date.now().toString();
+        await addDoc(collection(db, "projects", projectId, "lists"), {
+          id: identify,
+          name: title,
+          created: Timestamp.now(),
+        });
+        this.props.toggleAddingList();
+      } catch (error) {
+        alert("List could not be added");
+      }
     }
   };
 

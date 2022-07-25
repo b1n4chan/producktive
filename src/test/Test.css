@@ -1,7 +1,6 @@
 .flexContainer {
   display: flex;
   flex-wrap: wrap;
-  background-color: #f4e9ba;
 }
 
 .addList {

@@ -8,9 +8,9 @@ import {
   query,
   collection,
   getDocs,
-  setDoc,
   addDoc,
   doc,
+  setDoc,
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -29,7 +29,6 @@ import {
   FormControl,
   Fab,
   InputLabel,
-  Box,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -46,10 +45,13 @@ function FormDialog({
   projectId,
 }) {
   const [newCategory, setNewCategory] = useState("");
+  const [user] = useAuthState(auth);
+
   const addNewCategory = async () => {
     try {
       await addDoc(collection(db, "projects", projectId, "category"), {
         category: newCategory,
+        uid: user.uid,
       });
       setCategory(newCategory);
       setSuccessC(true);
@@ -80,17 +82,17 @@ function FormDialog({
           <FormControl variant="standard" fullWidth sx={{ mt: 1 }}>
             <InputLabel id="demo-simple-select-label">Category</InputLabel>
             <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
               value={category}
               label="Category"
               onChange={(e) => setCategory(e.target.value)}
             >
-              <MenuItem value="">
-                <em>None</em>
+              <MenuItem disabled value="">
+                <em>Select Category</em>
               </MenuItem>
               {categories.map((e) => (
-                <MenuItem value={e.category} key={e.category}>
-                  {e.category}
-                </MenuItem>
+                <MenuItem value={e.category}>{e.category}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -121,7 +123,7 @@ function FormDialog({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={addNote}>Add</Button>
+          <Button onClick={addNote}>Submit</Button>
         </DialogActions>
       </Dialog>
     </div>
@@ -136,8 +138,9 @@ const Notes = () => {
   const [notes, setNotes] = useState([]);
   const [note, setNote] = useState("");
   const [edit, setEdit] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [category, setCategory] = useState("");
+  const [noted, setNoted] = useState(0);
+  const [categories, setCateogories] = useState([]);
+  const [category, setCategory] = useState("Select Category");
   const navigate = useNavigate();
   const location = useLocation();
   const projectName = location.state.projectName;
@@ -170,7 +173,7 @@ const Notes = () => {
       cDoc.docs.forEach((element) => {
         ca.push(element.data());
       });
-      setCategories(ca);
+      setCateogories(ca);
       setNotes(n);
     } catch (err) {
       console.error(err);
@@ -186,6 +189,11 @@ const Notes = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const changer = (e) => {
+    setEdit(!edit);
+    setNoted(e.id);
   };
 
   const addNote = async () => {
@@ -276,7 +284,7 @@ const Notes = () => {
             <Typography variant="body1">
               {e.note}
 
-              {edit ? (
+              {edit && noted == e.id ? (
                 <>
                   <FormControl fullWidth>
                     <TextField
@@ -313,8 +321,8 @@ const Notes = () => {
                   <Button
                     variant="contained"
                     style={{
-                      backgroundColor: "#fae29c",
                       color: "#694729",
+                      backgroundColor: "#fae29c",
                       padding: "5px",
                       marginRight: "5px",
                       width: "80px",
@@ -326,12 +334,12 @@ const Notes = () => {
                   <Button
                     variant="contained"
                     style={{
-                      backgroundColor: "#fae29c",
                       color: "#694729",
+                      backgroundColor: "#fae29c",
                       padding: "5px",
                       width: "80px",
                     }}
-                    onClick={() => setEdit(!edit)}
+                    onClick={() => changer(e)}
                   >
                     Edit
                   </Button>
